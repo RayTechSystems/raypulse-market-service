@@ -48,7 +48,16 @@ jobs:
           script: |
             cd ~/projectfiles/temp/python
             git pull origin main
+
+            # 1. Create the virtual environment if it doesn't exist
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            
+            # 2. Activate and install
             source venv/bin/activate
+            
+            # 3. Upgrade pip inside the venv (this avoids the externally-managed error)
             pip install -r requirements.txt
             pkill -f freeapp.py || true
             sleep 2
