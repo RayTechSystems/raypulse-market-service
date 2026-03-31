@@ -59,14 +59,20 @@ jobs:
             
             # 3. Upgrade pip inside the venv (this avoids the externally-managed error)
             pip install -r requirements.txt
-            pkill -f freeapp.py || true
-            sleep 2
+            # This kills anything on port 5000 before starting
+            sudo fuser -k 5000/tcp || true
+            sleep 5
             
-            # Start the app and fully DISCONNECT it from the terminal
-            # Use 'disown' and redirect all outputs so the SSH session can close
-            nohup python3 freeapp.py > freeapp.log 2>&1 &
-
+            # Start and redirect output to a specific path
+            nohup python3 freeapp.py > /home/ubuntu/projectfiles/temp/python/freeapp.log 2>&1 &
             # This is the magic part for CI/CD
             disown
             
-            echo "Deployed successfully!"
+            sleep 5
+            if pgrep -f freeapp.py; then
+               echo "App is running successfully!"
+            else
+               echo "App failed to start. Printing logs:"
+               cat /home/ubuntu/projectfiles/temp/python/freeapp.log
+               exit 1
+            fi
