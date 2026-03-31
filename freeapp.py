@@ -3,13 +3,20 @@ from flask_cors import CORS
 import yfinance, time, threading
 
 app = Flask(__name__)
-CORS(app, origins=[
-    "https://yellow-pond-0463cf400.6.azurestaticapps.net",
-    "http://localhost",
-    "http://127.0.0.1",
-    "http://144.24.117.46"
-])
-
+CORS(app, resources={
+    r"/*":{
+        "origins":[
+            "https://yellow-pond-0463cf400.6.azurestaticapps.net",
+            "http://localhost",
+            "http://localhost:3000",
+            "http://127.0.0.1",
+            "http://144.24.117.46",
+            "*"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "ngrok-skip-browser-warning"]
+    }
+})
 latest_data = {}
 
 SYMBOLS = {
