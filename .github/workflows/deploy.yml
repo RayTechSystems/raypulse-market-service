@@ -61,7 +61,14 @@ jobs:
             pip install -r requirements.txt
             pkill -f freeapp.py || true
             sleep 2
-            nohup python3 freeapp.py > freeapp.log 2>&1 &
-            echo "Deployed successfully!"
             
+            # Start the app and fully DISCONNECT it from the terminal
+            # Use 'disown' and redirect all outputs so the SSH session can close
+            nohup python3 freeapp.py > freeapp.log 2>&1 &
+
+            # This is the magic part for CI/CD
+            disown
+            
+            echo "Deployed successfully!"
+
             
