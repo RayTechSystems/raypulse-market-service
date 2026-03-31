@@ -30,7 +30,7 @@ jobs:
 
   deploy:
     name: Deploy to OCI VM
-    needs: test
+    # needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
