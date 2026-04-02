@@ -105,6 +105,12 @@ def fetch_market():
 
         time.sleep(5) # Poll every 5 seconds
 
+@app.route('/')
+def home():
+    # This WILL show up in logs now because of your new startup command
+    print("--- HOME ROUTE ACCESSED ---", flush=True)
+    return "RayPulse is running app route"
+
 @app.route("/market")
 def get_market():
     return jsonify(latest_data)
