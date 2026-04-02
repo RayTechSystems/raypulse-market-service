@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, logging
 from flask_cors import CORS
 from SmartApi import SmartConnect
 import pyotp
@@ -30,7 +30,13 @@ SYMBOLS = {
 def login_to_angel():
     """Handles the full login flow including TOTP"""
     global smart_api
+    # Connect Flask's logger to Gunicorn's error handlers
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
     try:
+        app.logger.info("Starting AngelOne APP")
         print("--- RAYPULSE STARTING --- " + time.strftime("%Y-%m-%d %H:%M:%S"), flush=True)
         print("Attempting Login...")
         smart_api = SmartConnect(api_key=API_KEY)
@@ -57,6 +63,7 @@ def fetch_market():
     
     # Ensure we are logged in before starting
     while not login_to_angel():
+        app.logger.info("Starting AngelOne Login...")
         print("Retrying login in 10 seconds...")
         time.sleep(10)
 
