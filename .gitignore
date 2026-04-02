@@ -1,3 +1,6 @@
+#CICD file of oracle cloud 
+.github/workflows/deploy-oci.yml
+
 # Python virtual environment
 venv/
 .venv/
