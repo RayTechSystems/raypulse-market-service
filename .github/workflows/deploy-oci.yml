@@ -1,78 +1,78 @@
-name: RayPulse Market Service CI/CD
+# name: RayPulse Market Service CI/CD
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
-jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   test:
+#     name: Run Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-          cache: 'pip'
+#       - name: Set up Python 3.12
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.12'
+#           cache: 'pip'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+#           pip install pytest
 
-      - name: Run tests
-        run: pytest tests/ -v
+#       - name: Run tests
+#         run: pytest tests/ -v
 
-  deploy:
-    name: Deploy to OCI VM
-    # needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+#   deploy:
+#     name: Deploy to OCI VM
+#     # needs: test
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ubuntu
-          key: ${{ secrets.OCI_SSH_KEY }}
-          script: |
-            cd ~/projectfiles/temp/python
-            git pull origin main
+#       - name: Deploy via SSH
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.OCI_HOST }}
+#           username: ubuntu
+#           key: ${{ secrets.OCI_SSH_KEY }}
+#           script: |
+#             cd ~/projectfiles/temp/python
+#             git pull origin main
 
-            # 1. Create the virtual environment if it doesn't exist
-            if [ ! -d "venv" ]; then
-              python3 -m venv venv
-            fi
+#             # 1. Create the virtual environment if it doesn't exist
+#             if [ ! -d "venv" ]; then
+#               python3 -m venv venv
+#             fi
             
-            # 2. Activate and install
-            source venv/bin/activate
+#             # 2. Activate and install
+#             source venv/bin/activate
             
-            # 3. Upgrade pip inside the venv (this avoids the externally-managed error)
-            pip install -r requirements.txt
-            # This kills anything on port 5000 before starting
-            sudo fuser -k 5000/tcp || true
-            sleep 5
+#             # 3. Upgrade pip inside the venv (this avoids the externally-managed error)
+#             pip install -r requirements.txt
+#             # This kills anything on port 5000 before starting
+#             sudo fuser -k 5000/tcp || true
+#             sleep 5
             
-            # Start and redirect output to a specific path
-            nohup python3 freeapp.py > /home/ubuntu/projectfiles/temp/python/freeapp.log 2>&1 &
-            # This is the magic part for CI/CD
-            disown
+#             # Start and redirect output to a specific path
+#             nohup python3 freeapp.py > /home/ubuntu/projectfiles/temp/python/freeapp.log 2>&1 &
+#             # This is the magic part for CI/CD
+#             disown
             
-            sleep 5
-            if pgrep -f freeapp.py; then
-               echo "App is running successfully!"
-            else
-               echo "App failed to start. Printing logs:"
-               cat /home/ubuntu/projectfiles/temp/python/freeapp.log
-               exit 1
-            fi
+#             sleep 5
+#             if pgrep -f freeapp.py; then
+#                echo "App is running successfully!"
+#             else
+#                echo "App failed to start. Printing logs:"
+#                cat /home/ubuntu/projectfiles/temp/python/freeapp.log
+#                exit 1
+#             fi
