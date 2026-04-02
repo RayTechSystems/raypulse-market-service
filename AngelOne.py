@@ -31,7 +31,7 @@ def login_to_angel():
     """Handles the full login flow including TOTP"""
     global smart_api
     try:
-        print("--- RAYPULSE STARTING ---", flush=True)
+        print("--- RAYPULSE STARTING --- " + time.strftime("%Y-%m-%d %H:%M:%S"), flush=True)
         print("Attempting Login...")
         smart_api = SmartConnect(api_key=API_KEY)
         
