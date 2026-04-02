@@ -1,3 +1,5 @@
+import sys
+
 from flask import Flask, jsonify, logging
 from flask_cors import CORS
 from SmartApi import SmartConnect
@@ -37,8 +39,8 @@ def login_to_angel():
 
     try:
         app.logger.info("Starting AngelOne APP")
-        print("--- RAYPULSE STARTING --- " + time.strftime("%Y-%m-%d %H:%M:%S"), flush=True)
-        print("Attempting Login...")
+        print("--- RAYPULSE STARTING --- " + time.strftime("%Y-%m-%d %H:%M:%S"),file=sys.stderr, flush=True)
+        print("Attempting Login...", file=sys.stderr, flush=True)
         smart_api = SmartConnect(api_key=API_KEY)
         
         # Generate TOTP
