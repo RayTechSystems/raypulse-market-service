@@ -1,6 +1,7 @@
 import sys
 
-from flask import Flask, jsonify, logging
+from flask import Flask, jsonify
+import logging
 from flask_cors import CORS
 from SmartApi import SmartConnect
 import pyotp
@@ -50,13 +51,13 @@ def login_to_angel():
         data = smart_api.generateSession(CLIENT_ID, PASSWORD, totp)
         
         if data['status']:
-            print("Login Successful!")
+            print("Login Successful!",file=sys.stderr, flush=True)
             return True
         else:
-            print(f"Login Failed: {data['message']}")
+            print(f"Login Failed: {data['message']}", file=sys.stderr, flush=True)
             return False
     except Exception as e:
-        print(f"Login Exception: {e}")
+        print(f"Login Exception: {e}", file=sys.stderr, flush=True)
         return False
 
 def fetch_market():
@@ -66,7 +67,7 @@ def fetch_market():
     # Ensure we are logged in before starting
     while not login_to_angel():
         app.logger.info("Starting AngelOne Login...")
-        print("Retrying login in 10 seconds...")
+        print("Retrying login in 10 seconds...", file=sys.stderr, flush=True)
         time.sleep(10)
 
     while True:
@@ -95,7 +96,7 @@ def fetch_market():
                     print(f"Error fetching {name}: {response.get('message')}")
             
             latest_data = result
-            print("--- All SmartAPI data fetched ---")
+            print("--- All SmartAPI data fetched ---", file=sys.stderr, flush=True)
 
         except Exception as e:
             print(f"Global Fetch Error: {e}")
@@ -104,12 +105,6 @@ def fetch_market():
                 login_to_angel()
 
         time.sleep(5) # Poll every 5 seconds
-
-@app.route('/')
-def home():
-    # This WILL show up in logs now because of your new startup command
-    print("--- HOME ROUTE ACCESSED ---", flush=True)
-    return "RayPulse is running app route"
 
 @app.route("/market")
 def get_market():
