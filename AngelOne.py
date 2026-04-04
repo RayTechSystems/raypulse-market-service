@@ -19,7 +19,7 @@ PASSWORD = os.getenv("ANGEL_PASSWORD")
 TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
 
 # 3. Validation: Stop the app immediately if secrets are missing
-# This prevents confusing "NoneType" errors later in your logic
+# This prevents confusing "NoneType" errors later in your logic.
 required_secrets = {
     "ANGEL_API_KEY": ANGEL_API_KEY,
     "ANGEL_CLIENT_ID": ANGEL_CLIENT_ID,
