@@ -41,17 +41,19 @@ jobs:
             # 5. Start with ABSOLUTE paths and touch the log file first
             touch $APP_DIR/output.log
             chmod 666 $APP_DIR/output.log
-            
+
             echo "Starting AngelOne.py..."
             # Using the full path to the python executable inside your venv
             nohup $APP_DIR/venv/bin/python $APP_DIR/AngelOne.py > $APP_DIR/output.log 2>&1 &
 
-            # Give it 2 seconds to see if it crashes immediately
-            sleep 2
-            if ps aux | grep -v grep | grep "AngelOne.py" > /dev/null
+            # 7. Final Verification
+            sleep 3
+            if pgrep -f "AngelOne.py" > /dev/null
             then
-                echo "Process started successfully!"
+              echo "Success! Process is running."
+              ls -l $APP_DIR/output.log
             else
-                echo "ERROR: Process failed to start. Check output.log"
-                cat output.log
+              echo "ERROR: Process died. Printing captured logs:"
+              cat $APP_DIR/output.log
             fi
+
