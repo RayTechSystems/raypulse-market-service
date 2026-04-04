@@ -1,3 +1,4 @@
+import os
 import sys
 
 from flask import Flask, jsonify
@@ -12,10 +13,19 @@ app = Flask(__name__)
 CORS(app)
 
 # --- CONFIGURATION ---
-API_KEY = "***REMOVED***"
-CLIENT_ID = "***REMOVED***"
-PASSWORD = "***REMOVED***"
-TOTP_SECRET = "***REMOVED***"
+API_KEY = os.getenv("ANGEL_API_KEY")
+CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
+PASSWORD = os.getenv("ANGEL_PASSWORD")
+TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
+
+# 3. Validation: Stop the app immediately if secrets are missing
+# This prevents confusing "NoneType" errors later in your logic
+required_secrets = {
+    "ANGEL_API_KEY": ANGEL_API_KEY,
+    "ANGEL_CLIENT_ID": ANGEL_CLIENT_ID,
+    "ANGEL_PASSWORD": ANGEL_PASSWORD,
+    "ANGEL_TOTP_SECRET": ANGEL_TOTP_SECRET
+}
 
 # GLOBAL STATE
 latest_data = {}
