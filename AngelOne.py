@@ -9,8 +9,14 @@ import pyotp
 import time
 import threading
 
+from dotenv import load_dotenv
+
+
+
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
 
 # --- CONFIGURATION ---
 API_KEY = os.getenv("ANGEL_API_KEY")
