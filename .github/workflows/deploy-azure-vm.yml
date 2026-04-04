@@ -8,54 +8,51 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: SSH and Deploy to Azure
+      - name: SSH and Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AZ_VM_IP }}
           username: ${{ secrets.AZ_VM_USER }}
           key: ${{ secrets.AZ_VM_SSH_KEY }}
           port: ${{ secrets.AZ_VM_PORT }}
+          # KEY FIX: Pass secrets as env vars so they resolve inside the remote shell
+          envs: AZ_VM_USER
           script: |
-            # 1. Define the directory with absolute path
-            APP_DIR=/home/${{ secrets.AZ_VM_USER }}/projectfiles/test/raypulse-market-service
-            cd $APP_DIR
+            set -e
+            APP_DIR="/home/$AZ_VM_USER/projectfiles/test/raypulse-market-service"
 
-            # 2. Update code - We use a temp backup for .env so it isn't deleted
+            echo "--- Pulling latest code ---"
+            cd "$APP_DIR"
             [ -f .env ] && cp .env /tmp/.env_backup
             git fetch origin main
             git reset --hard origin/main
             [ -f /tmp/.env_backup ] && mv /tmp/.env_backup .env
 
-            # 3. Update Python environment using absolute venv path
-            $APP_DIR/venv/bin/pip install -r requirements.txt
-            
-            # 4. Kill existing process
-            echo "Restarting RayPulse Service..."
-            pkill -f AngelOne.py || true
+            echo "--- Installing dependencies ---"
+            "$APP_DIR/venv/bin/pip" install -q -r requirements.txt
+
+            echo "--- Stopping old process ---"
+            pkill -f "AngelOne.py" || true
             sleep 2
-            
-            # 5. Setup Logs
-            touch $APP_DIR/output.log
-            chmod 666 $APP_DIR/output.log
 
-            # 6. Bulletproof Background Start
-            # setsid + redirecting all 3 streams (stdin, stdout, stderr) 
-            # is the only way to ensure the process survives SSH logout.
-            echo "Launching AngelOne.py..."
-            nohup setsid $APP_DIR/venv/bin/python $APP_DIR/AngelOne.py </dev/null >$APP_DIR/output.log 2>&1 &
+            echo "--- Starting AngelOne.py ---"
+            # nohup alone is sufficient — setsid is not needed here
+            nohup "$APP_DIR/venv/bin/python" "$APP_DIR/AngelOne.py" \
+              </dev/null \
+              >"$APP_DIR/output.log" 2>&1 &
 
-            # 7. Final Verification
             sleep 5
-            if pgrep -f "AngelOne.py" > /dev/null
-            then
-              echo "✅ Success! Process is running."
-              pgrep -a -f "AngelOne.py"
+
+            echo "--- Verifying process ---"
+            if pgrep -f "AngelOne.py" > /dev/null; then
+              echo "✅ Deployment successful — process is running."
             else
-              echo "❌ ERROR: Process failed to stay alive. Last 20 lines of log:"
-              tail -n 20 $APP_DIR/output.log
+              echo "❌ Process failed. Last 30 lines of log:"
+              tail -n 30 "$APP_DIR/output.log"
               exit 1
             fi
