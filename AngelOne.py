@@ -58,13 +58,14 @@ def login_to_angel():
         app.logger.info("Starting AngelOne APP")
         print("--- RAYPULSE STARTING --- " + time.strftime("%Y-%m-%d %H:%M:%S"),file=sys.stderr, flush=True)
         print("Attempting Login...", file=sys.stderr, flush=True)
-        smart_api = SmartConnect(api_key=API_KEY)
+        smart_api = SmartConnect(api_key=ANGEL_API_KEY
+        )
         
         # Generate TOTP
-        totp = pyotp.TOTP(TOTP_SECRET).now()
+        totp = pyotp.TOTP(ANGEL_TOTP_SECRET).now()
         
         # Generate Session
-        data = smart_api.generateSession(CLIENT_ID, PASSWORD, totp)
+        data = smart_api.generateSession(ANGEL_CLIENT_ID, ANGEL_PASSWORD, totp)
         
         if data['status']:
             print("Login Successful!",file=sys.stderr, flush=True)
