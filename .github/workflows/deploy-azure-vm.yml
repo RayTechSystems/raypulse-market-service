@@ -1,37 +1,42 @@
-name: Deploy to Azure VM
+name: Deploy RayPulse Market Service
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: SSH and Deploy
+      - name: Deploy AngelOne.py to Azure VM
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.AZ_VM_IP }}
+          host:     ${{ secrets.AZ_VM_IP }}
           username: ${{ secrets.AZ_VM_USER }}
-          key: ${{ secrets.AZ_VM_SSH_KEY }}
-          port: ${{ secrets.AZ_VM_PORT }}
-          # KEY FIX: Pass secrets as env vars so they resolve inside the remote shell
-          envs: AZ_VM_USER
+          key:      ${{ secrets.AZ_VM_SSH_KEY }}
+          port:     ${{ secrets.AZ_VM_PORT }}
           script: |
             set -e
-            APP_DIR="/home/$AZ_VM_USER/projectfiles/test/raypulse-market-service"
+            APP_DIR="/home/${{ secrets.AZ_VM_USER }}/projectfiles/test/raypulse-market-service"
 
             echo "--- Pulling latest code ---"
             cd "$APP_DIR"
+
             [ -f .env ] && cp .env /tmp/.env_backup
             git fetch origin main
             git reset --hard origin/main
             [ -f /tmp/.env_backup ] && mv /tmp/.env_backup .env
+
+            echo "--- Writing .env from GitHub Secrets ---"
+            # This ensures your .env is always in sync with GitHub secrets
+            # even on a fresh VM where .env doesn't exist yet
+            cat > "$APP_DIR/.env" <<EOF
+            ANGEL_API_KEY=${{ secrets.ANGEL_API_KEY }}
+            ANGEL_CLIENT_ID=${{ secrets.ANGEL_CLIENT_ID }}
+            ANGEL_PASSWORD=${{ secrets.ANGEL_PASSWORD }}
+            ANGEL_TOTP_SECRET=${{ secrets.ANGEL_TOTP_SECRET }}
+            EOF
 
             echo "--- Installing dependencies ---"
             "$APP_DIR/venv/bin/pip" install -q -r requirements.txt
@@ -41,7 +46,6 @@ jobs:
             sleep 2
 
             echo "--- Starting AngelOne.py ---"
-            # nohup alone is sufficient — setsid is not needed here
             nohup "$APP_DIR/venv/bin/python" "$APP_DIR/AngelOne.py" \
               </dev/null \
               >"$APP_DIR/output.log" 2>&1 &
