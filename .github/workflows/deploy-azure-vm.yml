@@ -25,7 +25,8 @@ jobs:
             
             # 2. Update code from GitHub
             # Note: Ensure your VM has git credentials or a Deploy Key set up
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             
             # 3. Update Python environment
             source venv/bin/activate
