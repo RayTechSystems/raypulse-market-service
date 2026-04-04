@@ -1,5 +1,7 @@
 #CICD file of oracle cloud 
 .github/workflows/deploy-oci.yml
+.github/workflows/main_app-raypulse-market-prod.yml
+
 
 # Python virtual environment
 venv/
