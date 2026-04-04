@@ -26,16 +26,12 @@ jobs:
             git reset --hard origin/main
 
             echo "--- Writing .env ---"
-            cat > "$APP_DIR/.env" <<'ENVEOF'
-ANGEL_API_KEY=${{ secrets.ANGEL_API_KEY }}
-ANGEL_CLIENT_ID=${{ secrets.ANGEL_CLIENT_ID }}
-ANGEL_PASSWORD=${{ secrets.ANGEL_PASSWORD }}
-ANGEL_TOTP_SECRET=${{ secrets.ANGEL_TOTP_SECRET }}
-ENVEOF
-
-            echo "--- Verifying .env ---"
-            echo ".env line count: $(wc -l < "$APP_DIR/.env")"
-            grep -c "ANGEL_API_KEY" "$APP_DIR/.env" && echo ".env looks good" || echo "WARNING: .env may be malformed"
+            printf 'ANGEL_API_KEY=%s\nANGEL_CLIENT_ID=%s\nANGEL_PASSWORD=%s\nANGEL_TOTP_SECRET=%s\n' \
+              '${{ secrets.ANGEL_API_KEY }}' \
+              '${{ secrets.ANGEL_CLIENT_ID }}' \
+              '${{ secrets.ANGEL_PASSWORD }}' \
+              '${{ secrets.ANGEL_TOTP_SECRET }}' \
+              > "$APP_DIR/.env"
 
             echo "--- Installing dependencies ---"
             "$APP_DIR/venv/bin/pip" install -q -r requirements.txt
@@ -59,4 +55,3 @@ ENVEOF
               tail -n 30 "$APP_DIR/output.log"
               exit 1
             fi
-            
