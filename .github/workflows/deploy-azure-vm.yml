@@ -1,0 +1,43 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main  # Only deploys when you push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: SSH and Deploy to Azure
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AZ_VM_IP }}
+          username: ${{ secrets.AZ_VM_USER }}
+          key: ${{ secrets.AZ_VM_SSH_KEY }}
+          port: ${{ secrets.AZ_VM_PORT }}
+          script: |
+            # 1. Enter the project directory
+            cd ~/projectfiles/test/raypulse-market-service
+            
+            # 2. Update code from GitHub
+            # Note: Ensure your VM has git credentials or a Deploy Key set up
+            git pull origin main
+            
+            # 3. Update Python environment
+            source venv/bin/activate
+            pip install -r requirements.txt
+            
+            # 4. Restart the Application
+            # This kills any existing AngelOne.py process and starts a new one
+            echo "Restarting RayPulse Service..."
+            pkill -f AngelOne.py || true
+            
+            # Run in background with nohup so it stays alive after SSH closes
+            nohup python AngelOne.py > output.log 2>&1 &
+            
+            echo "Deployment to Azure VM Successful!"
+            
