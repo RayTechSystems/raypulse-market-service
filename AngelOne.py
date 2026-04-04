@@ -41,7 +41,7 @@ SYMBOLS = {
 }
 
 def login_to_angel():
-    """Handles the full login flow including TOTP"""
+    "Handles the full login flow including TOTP"
     global smart_api
     # Connect Flask's logger to Gunicorn's error handlers
     gunicorn_logger = logging.getLogger('gunicorn.error')
