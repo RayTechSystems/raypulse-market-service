@@ -39,9 +39,9 @@ jobs:
             pkill -f AngelOne.py || true
             
             # 5. Start with ABSOLUTE paths and touch the log file first
-            touch output.log
-            chmod 666 output.log
-
+            touch $APP_DIR/output.log
+            chmod 666 $APP_DIR/output.log
+            
             echo "Starting AngelOne.py..."
             # Using the full path to the python executable inside your venv
             nohup $APP_DIR/venv/bin/python $APP_DIR/AngelOne.py > $APP_DIR/output.log 2>&1 &
@@ -55,4 +55,3 @@ jobs:
                 echo "ERROR: Process failed to start. Check output.log"
                 cat output.log
             fi
-            
