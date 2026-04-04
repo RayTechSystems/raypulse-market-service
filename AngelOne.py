@@ -19,10 +19,10 @@ CORS(app)
 load_dotenv()
 
 # --- CONFIGURATION ---
-API_KEY = os.getenv("ANGEL_API_KEY")
-CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
-PASSWORD = os.getenv("ANGEL_PASSWORD")
-TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
+ANGEL_API_KEY = os.getenv("ANGEL_API_KEY")
+ANGEL_CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
+ANGEL_PASSWORD = os.getenv("ANGEL_PASSWORD")
+ANGEL_TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
 
 # 3. Validation: Stop the app immediately if secrets are missing
 # This prevents confusing "NoneType" errors later in your logic.
