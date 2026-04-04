@@ -20,9 +20,10 @@ jobs:
           key: ${{ secrets.AZ_VM_SSH_KEY }}
           port: ${{ secrets.AZ_VM_PORT }}
           script: |
-            # 1. Enter the project directory
-            cd ~/projectfiles/test/raypulse-market-service
-            
+            # 1. Define the directory
+            APP_DIR=~/projectfiles/test/raypulse-market-service
+            cd $APP_DIR
+
             # 2. Update code from GitHub
             # Note: Ensure your VM has git credentials or a Deploy Key set up
             git fetch origin main
@@ -37,8 +38,21 @@ jobs:
             echo "Restarting RayPulse Service..."
             pkill -f AngelOne.py || true
             
-            # Run in background with nohup so it stays alive after SSH closes
-            nohup python AngelOne.py > output.log 2>&1 &
-            
-            echo "Deployment to Azure VM Successful!"
+            # 5. Start with ABSOLUTE paths and touch the log file first
+            touch output.log
+            chmod 666 output.log
+
+            echo "Starting AngelOne.py..."
+            # Using the full path to the python executable inside your venv
+            nohup $APP_DIR/venv/bin/python $APP_DIR/AngelOne.py > $APP_DIR/output.log 2>&1 &
+
+            # Give it 2 seconds to see if it crashes immediately
+            sleep 2
+            if ps aux | grep -v grep | grep "AngelOne.py" > /dev/null
+            then
+                echo "Process started successfully!"
+            else
+                echo "ERROR: Process failed to start. Check output.log"
+                cat output.log
+            fi
             
