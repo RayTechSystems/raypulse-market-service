@@ -22,21 +22,20 @@ jobs:
 
             echo "--- Pulling latest code ---"
             cd "$APP_DIR"
-
-            [ -f .env ] && cp .env /tmp/.env_backup
             git fetch origin main
             git reset --hard origin/main
-            [ -f /tmp/.env_backup ] && mv /tmp/.env_backup .env
 
-            echo "--- Writing .env from GitHub Secrets ---"
-            # This ensures your .env is always in sync with GitHub secrets
-            # even on a fresh VM where .env doesn't exist yet
-            cat > "$APP_DIR/.env" <<EOF
-            ANGEL_API_KEY=${{ secrets.ANGEL_API_KEY }}
-            ANGEL_CLIENT_ID=${{ secrets.ANGEL_CLIENT_ID }}
-            ANGEL_PASSWORD=${{ secrets.ANGEL_PASSWORD }}
-            ANGEL_TOTP_SECRET=${{ secrets.ANGEL_TOTP_SECRET }}
-            EOF
+            echo "--- Writing .env ---"
+            cat > "$APP_DIR/.env" <<'ENVEOF'
+ANGEL_API_KEY=${{ secrets.ANGEL_API_KEY }}
+ANGEL_CLIENT_ID=${{ secrets.ANGEL_CLIENT_ID }}
+ANGEL_PASSWORD=${{ secrets.ANGEL_PASSWORD }}
+ANGEL_TOTP_SECRET=${{ secrets.ANGEL_TOTP_SECRET }}
+ENVEOF
+
+            echo "--- Verifying .env ---"
+            echo ".env line count: $(wc -l < "$APP_DIR/.env")"
+            grep -c "ANGEL_API_KEY" "$APP_DIR/.env" && echo ".env looks good" || echo "WARNING: .env may be malformed"
 
             echo "--- Installing dependencies ---"
             "$APP_DIR/venv/bin/pip" install -q -r requirements.txt
@@ -60,3 +59,4 @@ jobs:
               tail -n 30 "$APP_DIR/output.log"
               exit 1
             fi
+            
