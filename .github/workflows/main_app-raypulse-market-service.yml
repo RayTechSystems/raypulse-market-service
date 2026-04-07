@@ -73,4 +73,6 @@ jobs:
         with:
           app-name: 'app-raypulse-market-service'
           slot-name: 'Production'
+          # Add this line below:
+          startup-command: 'python AngelOne.py'
           
