@@ -43,7 +43,7 @@ jobs:
             echo "--- Starting AngelOne.py ---"
             nohup "$APP_DIR/venv/bin/python" "$APP_DIR/AngelOne.py" \
               </dev/null \
-              >"$APP_DIR/output.log" 2>&1 &
+              >"$APP_DIR/output.log" 2>&1 & disown
 
             sleep 5
 
